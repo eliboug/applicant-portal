@@ -1,0 +1,230 @@
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: var(--spacing-md);
+  color: var(--color-text-secondary);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-gray-light);
+  border-top-color: var(--color-elm-green);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  margin: var(--spacing-xs) 0 0 0;
+}
+
+/* Metrics */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+}
+
+@media (max-width: 1024px) {
+  .metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metricCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-light);
+}
+
+.metricIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+}
+
+.metricCard.primary .metricIcon {
+  background-color: rgba(31, 107, 63, 0.1);
+  color: var(--color-elm-green);
+}
+
+.metricCard.blue .metricIcon {
+  background-color: rgba(37, 99, 235, 0.1);
+  color: var(--color-status-submitted);
+}
+
+.metricCard.orange .metricIcon {
+  background-color: rgba(217, 119, 6, 0.1);
+  color: var(--color-status-under-review);
+}
+
+.metricCard.purple .metricIcon {
+  background-color: rgba(124, 58, 237, 0.1);
+  color: var(--color-status-interview);
+}
+
+.metricContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.metricValue {
+  font-size: 1.75rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.metricLabel {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+/* Table */
+.tableCard {
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filters {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.filterSelect {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius-md);
+  background-color: var(--color-white);
+  cursor: pointer;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--color-elm-green);
+}
+
+.noData {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--spacing-2xl);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--spacing-lg));
+  padding: 0 var(--spacing-lg);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table th,
+.table td {
+  padding: var(--spacing-md);
+  text-align: left;
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.table th {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  background-color: var(--color-off-white);
+  white-space: nowrap;
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-off-white);
+}
+
+.applicantName {
+  font-weight: var(--font-weight-semibold);
+}
+
+.needsAttention {
+  background-color: rgba(217, 119, 6, 0.05);
+}
+
+.paymentVerified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-status-accepted);
+  font-size: 0.875rem;
+}
+
+.paymentPending {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.highlight {
+  border: 2px solid var(--color-status-under-review);
+}
+
+.statusSelect {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius-md);
+  background-color: var(--color-white);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.statusSelect:hover:not(:disabled) {
+  border-color: var(--color-elm-green);
+}
+
+.statusSelect:focus {
+  outline: none;
+  border-color: var(--color-elm-green);
+  box-shadow: 0 0 0 2px rgba(31, 107, 63, 0.1);
+}
+
+.statusSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,0 +1,63 @@
+.selectGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.required {
+  color: var(--error);
+  margin-left: 0.25rem;
+}
+
+.select {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.select:hover {
+  border-color: var(--border-hover);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-alpha);
+}
+
+.select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selectError {
+  border-color: var(--error);
+}
+
+.selectError:focus {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px var(--error-alpha);
+}
+
+.hint {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.error {
+  font-size: 0.8125rem;
+  color: var(--error);
+  margin: 0;
+}

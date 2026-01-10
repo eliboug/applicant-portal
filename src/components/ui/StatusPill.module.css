@@ -1,0 +1,38 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.sm {
+  padding: 2px var(--spacing-sm);
+  font-size: 0.75rem;
+}
+
+.md {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: 0.875rem;
+}
+
+/* Status Colors */
+.received {
+  background-color: rgba(37, 99, 235, 0.15);
+  color: var(--color-status-submitted);
+}
+
+.payment_received {
+  background-color: rgba(5, 150, 105, 0.15);
+  color: var(--color-status-accepted);
+}
+
+.in_review {
+  background-color: rgba(217, 119, 6, 0.15);
+  color: var(--color-status-under-review);
+}
+
+.decision_released {
+  background-color: rgba(124, 58, 237, 0.15);
+  color: var(--color-status-interview);
+}

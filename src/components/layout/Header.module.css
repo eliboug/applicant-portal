@@ -1,0 +1,61 @@
+.header {
+  background-color: var(--color-elm-green-dark);
+  color: var(--color-white);
+  padding: var(--spacing-md) 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--color-white);
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+}
+
+.logoSubtext {
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-light);
+  color: var(--color-elm-green-light);
+  letter-spacing: 0.05em;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
+  color: var(--color-gray-light);
+}
+
+.roleBadge {
+  background-color: var(--color-elm-green);
+  color: var(--color-white);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-semibold);
+  text-transform: capitalize;
+}
