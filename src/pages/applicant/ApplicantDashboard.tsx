@@ -275,7 +275,13 @@ export function ApplicantDashboard() {
             <div className={styles.statusDisplay}>
               <StatusPill status={application.current_status as ApplicationStatus} size="md" />
               <p className={styles.statusMessage}>
-                {getStatusMessage(application)}
+                {application.current_status === 'submitted' ? (
+                  <>
+                    Your application has been submitted. Please wait as our team confirms your application fee has been received. Email our dev team <a href="mailto:eli.bouganim@yale.edu" style={{ color: 'blue' }}>here</a> if you think you've made a mistake on your application.
+                  </>
+                ) : (
+                  getStatusMessage(application)
+                )}
               </p>
             </div>
 
@@ -357,7 +363,7 @@ export function ApplicantDashboard() {
 function getStatusMessage(application: Application): string {
   const messages: Record<ApplicationStatus, string> = {
     draft: 'Complete your application form to submit.',
-    submitted: 'Your application has been submitted. Please wait as our team confirms your application fee has been received..',
+    submitted: 'Your application has been submitted. Please wait as our team confirms your application fee has been received. Email our dev team <a href="eli.bouganim@yale.edu">here</a> if you think you have made a mistake on your application.',
     payment_received: 'Payment verified! Your application is now in the queue for review.',
     in_review: 'Your application is currently being reviewed by our admissions team.',
     decision_released: 'A decision has been made on your application.',
