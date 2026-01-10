@@ -236,7 +236,7 @@ export function ApplicantDashboard() {
             <div>
               <h3>Payment Information</h3>
               <p>
-                After submitting your application, send the application fee via Venmo to <strong>@Elmseed</strong>.
+                After submitting your application, send the application fee via Venmo to <strong >@INSERT ASH VENMO</strong>.
                 Include your email address in the payment note for verification.
               </p>
             </div>
@@ -283,8 +283,7 @@ export function ApplicantDashboard() {
               <div className={styles.paymentReminder}>
                 <DollarSign size={20} />
                 <div>
-                  <strong>Payment Required</strong>
-                  <p>Send application fee via Venmo to <strong>@Elmseed</strong></p>
+                  <p><strong>Payment Required:</strong> Send application fee via Venmo to <strong>@placeholder-ash-venmo</strong></p>
                 </div>
               </div>
             )}
@@ -358,7 +357,7 @@ export function ApplicantDashboard() {
 function getStatusMessage(application: Application): string {
   const messages: Record<ApplicationStatus, string> = {
     draft: 'Complete your application form to submit.',
-    submitted: 'Your application has been submitted. Please complete your payment via Venmo to proceed.',
+    submitted: 'Your application has been submitted. Please wait as our team confirms your application fee has been received..',
     payment_received: 'Payment verified! Your application is now in the queue for review.',
     in_review: 'Your application is currently being reviewed by our admissions team.',
     decision_released: 'A decision has been made on your application.',
