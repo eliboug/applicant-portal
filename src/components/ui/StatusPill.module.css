@@ -17,6 +17,16 @@
 }
 
 /* Status Colors */
+.draft {
+  background-color: rgba(156, 163, 175, 0.15);
+  color: #6b7280;
+}
+
+.submitted {
+  background-color: var(--color-elm-green-light);
+  color: var(--color-elm-green-dark);
+}
+
 .received {
   background-color: rgba(37, 99, 235, 0.15);
   color: var(--color-status-submitted);

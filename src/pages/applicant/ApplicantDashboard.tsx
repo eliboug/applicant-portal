@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FileText, Clock, CheckCircle, AlertCircle, DollarSign, Search, Award } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import type { Application, ApplicationDocument, ApplicationStatus } from '../../types/database.ts';
@@ -25,6 +26,45 @@ export function ApplicantDashboard() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [decisionRevealed, setDecisionRevealed] = useState(false);
+
+  const triggerConfetti = () => {
+    const duration = 3000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    const randomInRange = (min: number, max: number) => {
+      return Math.random() * (max - min) + min;
+    };
+
+    const interval = setInterval(() => {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+      });
+    }, 250);
+  };
+
+  const handleViewDecision = () => {
+    setDecisionRevealed(true);
+    if (application?.decision === 'accepted') {
+      triggerConfetti();
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -125,8 +165,12 @@ export function ApplicantDashboard() {
       },
       {
         status: 'payment_received',
-        label: 'Payment Received',
-        description: 'Application fee verified',
+        label: application?.applying_for_financial_aid 
+          ? 'Financial Aid Request Approved' 
+          : 'Payment Received',
+        description: application?.applying_for_financial_aid 
+          ? 'Application Fee Waived' 
+          : 'Application fee verified',
         icon: <DollarSign size={16} />,
         completed: currentIndex > 2,
         current: currentIndex === 2
@@ -289,25 +333,46 @@ export function ApplicantDashboard() {
               <div className={styles.paymentReminder}>
                 <DollarSign size={20} />
                 <div>
-                  <p><strong>Payment Required:</strong> Send application fee via Venmo to <strong>@placeholder-ash-venmo</strong></p>
+                  {application.applying_for_financial_aid ? (
+                    <p><strong>Processing Your Financial Aid Information</strong></p>
+                  ) : (
+                    <p><strong>Payment Required:</strong> Send application fee via Venmo to <strong>@placeholder-ash-venmo</strong></p>
+                  )}
                 </div>
               </div>
             )}
 
             {application.current_status === 'decision_released' && application.decision && (
-              <div className={`${styles.decisionBanner} ${styles[application.decision]}`}>
-                {application.decision === 'accepted' ? (
-                  <>
-                    <CheckCircle size={24} />
-                    <span>Congratulations! You have been accepted.</span>
-                  </>
+              <>
+                {!decisionRevealed ? (
+                  <div className={styles.decisionPrompt}>
+                    <Award size={24} />
+                    <div>
+                      <p><strong>Your decision is ready</strong></p>
+                      <button 
+                        className={styles.viewDecisionButton}
+                        onClick={handleViewDecision}
+                      >
+                        View Decision
+                      </button>
+                    </div>
+                  </div>
                 ) : (
-                  <>
-                    <AlertCircle size={24} />
-                    <span>Thank you for applying. Unfortunately, we are unable to offer you admission at this time.</span>
-                  </>
+                  <div className={`${styles.decisionBanner} ${styles[application.decision]}`}>
+                    {application.decision === 'accepted' ? (
+                      <>
+                        <CheckCircle size={24} />
+                        <span>Congratulations! You have been accepted! We will email you with next steps soon. </span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle size={24} />
+                        <span>Thank you for applying. Unfortunately, we are unable to offer you admission at this time.</span>
+                      </>
+                    )}
+                  </div>
                 )}
-              </div>
+              </>
             )}
           </CardContent>
         </Card>
