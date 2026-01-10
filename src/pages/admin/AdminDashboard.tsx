@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, FileText, DollarSign, Search, Eye, AlertCircle, Send } from 'lucide-react';
+import { Users, FileText, DollarSign, Search, Eye, AlertCircle, Send, CheckCircle, XCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Application, ApplicationStatus } from '../../types/database.ts';
@@ -16,6 +16,8 @@ interface StatusCounts {
   in_review: number;
   decision_released: number;
   pending_payment: number;
+  accepted: number;
+  rejected: number;
 }
 
 interface ApplicationWithProfile extends Application {
@@ -36,11 +38,14 @@ export function AdminDashboard() {
     in_review: 0,
     decision_released: 0,
     pending_payment: 0,
+    accepted: 0,
+    rejected: 0,
   });
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'all' | 'pending_payment'>('all');
   const [releasingDecision, setReleasingDecision] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [releasingAll, setReleasingAll] = useState(false);
 
   useEffect(() => {
     fetchApplications();
@@ -73,16 +78,24 @@ export function AdminDashboard() {
         in_review: 0,
         decision_released: 0,
         pending_payment: 0,
+        accepted: 0,
+        rejected: 0,
       };
 
       apps.forEach(app => {
         const status = app.current_status as ApplicationStatus;
         if (status in counts) {
-          counts[status as keyof Omit<StatusCounts, 'total' | 'pending_payment'>]++;
+          counts[status as keyof Omit<StatusCounts, 'total' | 'pending_payment' | 'accepted' | 'rejected'>]++;
         }
         // Count apps awaiting payment verification
         if (status === 'submitted' && !app.payment_verified) {
           counts.pending_payment++;
+        }
+        // Count accepted and rejected decisions
+        if (app.decision === 'accepted') {
+          counts.accepted++;
+        } else if (app.decision === 'rejected') {
+          counts.rejected++;
         }
       });
 
@@ -140,6 +153,50 @@ export function AdminDashboard() {
     }
   }
 
+  async function releaseAllDecisions() {
+    if (!user) return;
+
+    // Find all applications with decisions that haven't been released yet
+    const applicationsWithDecisions = applications.filter(
+      app => app.current_status === 'in_review' && app.decision
+    );
+
+    if (applicationsWithDecisions.length === 0) {
+      alert('No decisions ready to release.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to release ${applicationsWithDecisions.length} decision(s)? This will notify all applicants and cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setReleasingAll(true);
+
+    try {
+      // Update all applications with decisions to decision_released status
+      const { error } = await supabase
+        .from('applications')
+        .update({ 
+          current_status: 'decision_released',
+          decision_released_at: new Date().toISOString()
+        })
+        .eq('current_status', 'in_review')
+        .not('decision', 'is', null);
+
+      if (error) throw error;
+
+      alert(`Successfully released ${applicationsWithDecisions.length} decision(s).`);
+      await fetchApplications();
+    } catch (err) {
+      console.error('Failed to release all decisions:', err);
+      alert('Failed to release decisions. Please try again.');
+    } finally {
+      setReleasingAll(false);
+    }
+  }
+
   const filteredApplications = statusFilter === 'all'
     ? applications
     : statusFilter === 'pending_payment'
@@ -155,11 +212,27 @@ export function AdminDashboard() {
     );
   }
 
+  const decisionsReadyToRelease = applications.filter(
+    app => app.current_status === 'in_review' && app.decision
+  ).length;
+
   return (
     <div className={styles.dashboard}>
       <header className={styles.header}>
-        <h1>Admin Dashboard</h1>
-        <p className={styles.subtitle}>Application Management</p>
+        <div>
+          <h1>Admin Dashboard</h1>
+          <p className={styles.subtitle}>Application Management</p>
+        </div>
+        {decisionsReadyToRelease > 0 && (
+          <Button
+            variant="primary"
+            onClick={releaseAllDecisions}
+            loading={releasingAll}
+          >
+            <Send size={18} />
+            Release All Decisions ({decisionsReadyToRelease})
+          </Button>
+        )}
       </header>
 
       <div className={styles.metrics}>
@@ -187,6 +260,18 @@ export function AdminDashboard() {
           label="Decisions Released"
           value={statusCounts.decision_released}
           color="purple"
+        />
+        <MetricCard
+          icon={<CheckCircle size={24} />}
+          label="Accepted"
+          value={statusCounts.accepted}
+          color="green"
+        />
+        <MetricCard
+          icon={<XCircle size={24} />}
+          label="Rejected"
+          value={statusCounts.rejected}
+          color="red"
         />
       </div>
 
@@ -312,7 +397,7 @@ interface MetricCardProps {
   icon: React.ReactNode;
   label: string;
   value: number;
-  color: 'primary' | 'blue' | 'orange' | 'purple';
+  color: 'primary' | 'blue' | 'orange' | 'purple' | 'green' | 'red';
   highlight?: boolean;
 }
 
