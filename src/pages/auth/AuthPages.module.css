@@ -13,11 +13,31 @@
   margin-bottom: var(--spacing-xl);
 }
 
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.logoImage {
+  height: 3rem; /* Larger than header for login page */
+  width: auto;
+  display: block;
+}
+
+.logoTextContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .logo {
   font-size: 2.5rem;
   font-weight: var(--font-weight-semibold);
   color: var(--color-elm-green-dark);
   margin: 0;
+  margin-bottom: 0.25rem;
 }
 
 .subtitle {

@@ -6,6 +6,7 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { SignupPage } from './pages/auth/SignupPage';
 import { ApplicantDashboard } from './pages/applicant/ApplicantDashboard';
 import { ApplicationForm } from './pages/applicant/ApplicationForm';
+import { ApplicationStatus } from './pages/applicant/ApplicationStatus';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { ApplicationReview } from './pages/admin/ApplicationReview';
 import './styles/global.css';
@@ -33,7 +34,7 @@ function AppRoutes() {
           <Layout />
         </ProtectedRoute>
       }>
-        {/* Applicant routes - single dashboard with upload + status tracking */}
+        {/* Applicant routes */}
         <Route path="/" element={
           profile?.role === 'admin' || profile?.role === 'reviewer'
             ? <Navigate to="/admin" replace />
@@ -41,6 +42,7 @@ function AppRoutes() {
         } />
 
         <Route path="/application/:id" element={<ApplicationForm />} />
+        <Route path="/status" element={<ApplicationStatus />} />
 
         {/* Admin/Reviewer routes */}
         <Route path="/admin" element={

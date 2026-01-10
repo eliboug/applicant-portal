@@ -30,6 +30,8 @@ export function ApplicationForm() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -77,7 +79,8 @@ export function ApplicationForm() {
       setApplication(app as Application);
       setFirstName(app.first_name || '');
       setLastName(app.last_name || '');
-      setDateOfBirth(app.date_of_birth || '');
+      // Format date properly to avoid timezone issues
+      setDateOfBirth(app.date_of_birth ? app.date_of_birth.split('T')[0] : '');
       setHighSchool(app.high_school || '');
       setGpa(app.gpa || '');
       setCountry(app.country || '');
@@ -104,6 +107,7 @@ export function ApplicationForm() {
     if (!id) return;
     setSaving(true);
     setError('');
+    setSaveSuccess(false);
 
     try {
       const { error } = await supabase
@@ -111,56 +115,100 @@ export function ApplicationForm() {
         .update({
           first_name: firstName,
           last_name: lastName,
-          date_of_birth: dateOfBirth,
+          date_of_birth: dateOfBirth || null,
           high_school: highSchool,
           gpa: gpa,
           country: country,
-          state: state,
-          class_year: classYear,
+          state: state || null,
+          class_year: classYear || null,
           applying_for_financial_aid: applyingForFinancialAid,
-          financial_circumstances_overview: financialCircumstances,
-          financial_documentation_consent: financialConsent,
-          payment_certification: paymentCertification,
+          financial_circumstances_overview: financialCircumstances || null,
+          financial_documentation_consent: financialConsent || null,
+          payment_certification: paymentCertification || null,
         })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw error;
+      }
+      
+      // Show success message
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       setError('Failed to save progress');
-      console.error(err);
+      console.error('Save error:', err);
     } finally {
       setSaving(false);
     }
   }
 
+  function validateForm(): string[] {
+    const errors: string[] = [];
+
+    // Check applicant information
+    if (!firstName || !lastName || !dateOfBirth || !highSchool || !gpa || !country || !classYear) {
+      errors.push('info');
+    }
+
+    // Check documents
+    const applicationDoc = documents.find(d => d.file_type === 'application');
+    const transcriptDoc = documents.find(d => d.file_type === 'transcript');
+    if (!applicationDoc || !transcriptDoc) {
+      errors.push('documents');
+    }
+
+    // Check financial aid section
+    if (applyingForFinancialAid === null) {
+      errors.push('documents');
+    } else if (applyingForFinancialAid === true && (!financialCircumstances || !financialConsent)) {
+      errors.push('documents');
+    } else if (applyingForFinancialAid === false && !paymentCertification) {
+      errors.push('documents');
+    }
+
+    return errors;
+  }
+
+  function getSectionStatus(step: FormStep): 'complete' | 'incomplete' | 'in-progress' {
+    if (step === 'info') {
+      const hasAllFields = firstName && lastName && dateOfBirth && highSchool && gpa && country && classYear;
+      const hasSomeFields = firstName || lastName || dateOfBirth || highSchool || gpa || country || classYear;
+      if (hasAllFields) return 'complete';
+      if (hasSomeFields) return 'in-progress';
+      return 'incomplete';
+    }
+
+    if (step === 'documents') {
+      const applicationDoc = documents.find(d => d.file_type === 'application');
+      const transcriptDoc = documents.find(d => d.file_type === 'transcript');
+      const hasFinancialAidAnswer = applyingForFinancialAid !== null;
+      const hasFinancialAidComplete = applyingForFinancialAid === null ? false :
+        applyingForFinancialAid === true ? (financialCircumstances && financialConsent) :
+        !!paymentCertification;
+
+      const allComplete = applicationDoc && transcriptDoc && hasFinancialAidAnswer && hasFinancialAidComplete;
+      const someComplete = applicationDoc || transcriptDoc || hasFinancialAidAnswer;
+
+      if (allComplete) return 'complete';
+      if (someComplete) return 'in-progress';
+      return 'incomplete';
+    }
+
+    return 'incomplete';
+  }
+
   async function handleSubmit() {
     if (!id || !application) return;
 
-    const applicationDoc = documents.find(d => d.file_type === 'application');
-    const transcriptDoc = documents.find(d => d.file_type === 'transcript');
+    const errors = validateForm();
+    setValidationErrors(errors);
 
-    if (!firstName || !lastName || !dateOfBirth || !highSchool || !gpa || !country || !classYear) {
-      setError('Please fill in all required fields');
-      return;
-    }
-
-    if (!applicationDoc || !transcriptDoc) {
-      setError('Please upload both application and transcript documents');
-      return;
-    }
-
-    if (applyingForFinancialAid === null) {
-      setError('Please indicate whether you are applying for financial aid');
-      return;
-    }
-
-    if (applyingForFinancialAid === true && (!financialCircumstances || !financialConsent)) {
-      setError('Please complete all financial aid fields');
-      return;
-    }
-
-    if (applyingForFinancialAid === false && !paymentCertification) {
-      setError('Please complete the payment certification');
+    if (errors.length > 0) {
+      setError(`Please complete the following sections: ${errors.map(e => e === 'info' ? 'Applicant Information' : e === 'documents' ? 'Documents' : 'Review').join(', ')}`);
+      // Navigate to first incomplete section
+      setCurrentStep(errors[0] as FormStep);
       return;
     }
 
@@ -194,7 +242,7 @@ export function ApplicationForm() {
         .eq('id', id);
 
       if (error) throw error;
-      navigate('/');
+      navigate('/status');
     } catch (err) {
       setError('Failed to submit application');
       console.error(err);
@@ -307,17 +355,30 @@ export function ApplicationForm() {
         </div>
       )}
 
+      {saveSuccess && (
+        <div className={styles.successBanner} role="status">
+          <Save size={18} />
+          Progress saved successfully!
+        </div>
+      )}
+
       <div className={styles.stepIndicator}>
-        {steps.map((step, index) => (
-          <button
-            key={step.key}
-            className={`${styles.step} ${currentStep === step.key ? styles.active : ''} ${index < currentStepIndex ? styles.completed : ''}`}
-            onClick={() => setCurrentStep(step.key)}
-          >
-            <span className={styles.stepNumber}>{index + 1}</span>
-            <span className={styles.stepLabel}>{step.label}</span>
-          </button>
-        ))}
+        {steps.map((step, index) => {
+          const status = getSectionStatus(step.key);
+          const hasError = validationErrors.includes(step.key);
+          return (
+            <button
+              key={step.key}
+              className={`${styles.step} ${currentStep === step.key ? styles.active : ''} ${index < currentStepIndex ? styles.completed : ''} ${styles[status]} ${hasError ? styles.error : ''}`}
+              onClick={() => setCurrentStep(step.key)}
+            >
+              <span className={styles.stepNumber}>{index + 1}</span>
+              <span className={styles.stepLabel}>{step.label}</span>
+              {status === 'complete' && <span className={styles.statusBadge}>✓</span>}
+              {status === 'in-progress' && <span className={styles.statusBadge}>●</span>}
+            </button>
+          );
+        })}
       </div>
 
       <Card className={styles.formCard}>
@@ -401,7 +462,7 @@ export function ApplicationForm() {
                   <div key={docType} className={styles.uploadRow}>
                     <div className={styles.uploadInfo}>
                       <span className={styles.uploadLabel}>
-                        {docType === 'application' ? 'Application PDF' : 'Transcript PDF'}
+                        {docType === 'application' ? 'Application PDF *' : 'Unofficial Transcript *'}
                       </span>
                       {documents.find(d => d.file_type === docType) ? (
                         <span className={styles.uploadedFile}>
@@ -516,7 +577,7 @@ export function ApplicationForm() {
                   <dt>Name</dt>
                   <dd>{firstName} {lastName}</dd>
                   <dt>Date of Birth</dt>
-                  <dd>{dateOfBirth ? new Date(dateOfBirth).toLocaleDateString() : 'Not provided'}</dd>
+                  <dd>{dateOfBirth || 'Not provided'}</dd>
                   <dt>High School</dt>
                   <dd>{highSchool || 'Not provided'}</dd>
                   <dt>GPA</dt>

@@ -18,9 +18,21 @@
 
 .logo {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
   text-decoration: none;
   color: var(--color-white);
+}
+
+.logoImage {
+  height: 2.25rem; /* Matches the height of the logo text */
+  width: auto;
+  display: block;
+}
+
+.logoTextContainer {
+  display: flex;
+  flex-direction: column;
 }
 
 .logoText {

@@ -68,6 +68,19 @@
   margin-bottom: var(--spacing-lg);
 }
 
+.successBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: var(--radius-md);
+  color: #16a34a;
+  margin-bottom: var(--spacing-lg);
+  font-weight: var(--font-weight-medium);
+}
+
 .stepIndicator {
   display: flex;
   gap: var(--spacing-xs);
@@ -125,6 +138,58 @@
 
 .stepLabel {
   font-size: 0.875rem;
+}
+
+.statusBadge {
+  margin-left: var(--spacing-xs);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-bold);
+}
+
+.step.complete {
+  color: var(--color-elm-green);
+}
+
+.step.complete .stepNumber {
+  background-color: var(--color-elm-green);
+  color: var(--color-white);
+}
+
+.step.complete .statusBadge {
+  color: var(--color-elm-green);
+}
+
+.step.in-progress {
+  color: #f59e0b;
+}
+
+.step.in-progress .stepNumber {
+  background-color: #f59e0b;
+  color: var(--color-white);
+}
+
+.step.in-progress .statusBadge {
+  color: #f59e0b;
+}
+
+.step.incomplete .stepNumber {
+  background-color: var(--color-gray-light);
+  color: var(--color-text-muted);
+}
+
+.step.error {
+  animation: shake 0.5s;
+}
+
+.step.error .stepNumber {
+  background-color: var(--color-status-rejected);
+  color: var(--color-white);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
 .formCard {

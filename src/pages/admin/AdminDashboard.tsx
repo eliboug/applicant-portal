@@ -359,7 +359,7 @@ export function AdminDashboard() {
                           <span className={styles.paymentPending}>Pending</span>
                         )}
                       </td>
-                      <td>{new Date(app.created_at).toLocaleDateString()}</td>
+                      <td>{new Date(app.created_at).toLocaleDateString('en-US', { timeZone: 'UTC' })}</td>
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                           <Link to={`/admin/application/${app.id}`}>

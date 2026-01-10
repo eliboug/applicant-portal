@@ -17,8 +17,11 @@ export function Header() {
     <header className={styles.header}>
       <div className={styles.container}>
         <Link to="/" className={styles.logo}>
-          <span className={styles.logoText}>Elmseed</span>
-          <span className={styles.logoSubtext}>Applicant Portal</span>
+          <img src="/elmseed.avif" alt="Elmseed" className={styles.logoImage} />
+          <div className={styles.logoTextContainer}>
+            <span className={styles.logoText}>Elmseed</span>
+            <span className={styles.logoSubtext}>Applicant Portal</span>
+          </div>
         </Link>
 
         {user && (

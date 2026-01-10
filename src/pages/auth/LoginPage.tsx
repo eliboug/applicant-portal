@@ -36,8 +36,13 @@ export function LoginPage() {
   return (
     <div className={styles.authContainer}>
       <div className={styles.authHeader}>
-        <h1 className={styles.logo}>Elmseed</h1>
-        <p className={styles.subtitle}>Applicant Portal</p>
+        <div className={styles.logoContainer}>
+          <img src="/elmseed.avif" alt="Elmseed" className={styles.logoImage} />
+          <div className={styles.logoTextContainer}>
+            <h1 className={styles.logo}>Elmseed</h1>
+            <p className={styles.subtitle}>Applicant Portal</p>
+          </div>
+        </div>
       </div>
 
       <Card className={styles.authCard}>

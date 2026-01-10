@@ -322,7 +322,7 @@ export function ApplicationReview() {
                 <dd>{application.last_name || '—'}</dd>
                 
                 <dt>Date of Birth</dt>
-                <dd>{application.date_of_birth ? new Date(application.date_of_birth).toLocaleDateString() : '—'}</dd>
+                <dd>{application.date_of_birth ? application.date_of_birth.split('T')[0] : '—'}</dd>
                 
                 <dt>High School</dt>
                 <dd>{application.high_school || '—'}</dd>
@@ -340,14 +340,14 @@ export function ApplicationReview() {
                 <dd>{application.class_year || '—'}</dd>
                 
                 <dt>Submitted</dt>
-                <dd>{new Date(application.created_at).toLocaleDateString()}</dd>
+                <dd>{new Date(application.created_at).toLocaleDateString('en-US', { timeZone: 'UTC' })}</dd>
                 
                 <dt>Payment Status</dt>
                 <dd>
                   {application.payment_verified ? (
                     <span className={styles.paymentVerified}>
                       <DollarSign size={14} />
-                      Verified {application.payment_verified_at && `on ${new Date(application.payment_verified_at).toLocaleDateString()}`}
+                      Verified {application.payment_verified_at && `on ${new Date(application.payment_verified_at).toLocaleDateString('en-US', { timeZone: 'UTC' })}`}
                     </span>
                   ) : (
                     <span className={styles.paymentPending}>Awaiting verification</span>
@@ -382,7 +382,7 @@ export function ApplicationReview() {
                       <div className={styles.documentInfo}>
                         <span className={styles.documentName}>{doc.file_name}</span>
                         <span className={styles.documentDate}>
-                          Uploaded {new Date(doc.uploaded_at).toLocaleDateString()}
+                          Uploaded {new Date(doc.uploaded_at).toLocaleDateString('en-US', { timeZone: 'UTC' })}
                         </span>
                       </div>
                       <div className={styles.documentActions}>
