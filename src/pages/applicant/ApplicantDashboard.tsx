@@ -29,8 +29,8 @@ export function ApplicantDashboard() {
   const [decisionRevealed, setDecisionRevealed] = useState(false);
 
   const triggerConfetti = () => {
-    const duration = 3000;
-    const animationEnd = Date.now() + duration;
+    const durationSeconds = 5000;
+    const animationEnd = Date.now() + durationSeconds;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
     const randomInRange = (min: number, max: number) => {
@@ -44,7 +44,7 @@ export function ApplicantDashboard() {
         return clearInterval(interval);
       }
 
-      const particleCount = 50 * (timeLeft / duration);
+      const particleCount = 50 * (timeLeft / durationSeconds);
 
       confetti({
         ...defaults,
