@@ -57,7 +57,7 @@ export function AdminDashboard() {
         .from('applications')
         .select(`
           *,
-          profiles:user_id (
+          profiles!applications_user_id_fkey (
             email,
             full_name
           )

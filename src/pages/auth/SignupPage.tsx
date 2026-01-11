@@ -13,7 +13,6 @@ export function SignupPage() {
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const { signUp } = useAuth();
   const navigate = useNavigate();
@@ -40,33 +39,9 @@ export function SignupPage() {
       setError(signUpError.message);
       setLoading(false);
     } else {
-      setSuccess(true);
+      navigate('/');
     }
   };
-
-  if (success) {
-    return (
-      <div className={styles.authContainer}>
-        <div className={styles.authHeader}>
-          <h1 className={styles.logo}>Elmseed</h1>
-          <p className={styles.subtitle}>Applicant Portal</p>
-        </div>
-
-        <Card className={styles.authCard}>
-          <CardContent>
-            <h2 className={styles.title}>Check Your Email</h2>
-            <p className={styles.description}>
-              We've sent a confirmation link to <strong>{email}</strong>.
-              Please check your inbox and click the link to activate your account.
-            </p>
-            <Button onClick={() => navigate('/login')} className={styles.submitButton}>
-              Return to Sign In
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.authContainer}>

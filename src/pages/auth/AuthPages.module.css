@@ -37,13 +37,14 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-elm-green-dark);
   margin: 0;
-  margin-bottom: 0.25rem;
+  line-height: 1;
 }
 
 .subtitle {
   font-size: 1rem;
   color: var(--color-text-secondary);
   margin: 0;
+  margin-top: 0.05rem;
   letter-spacing: 0.05em;
 }
 
