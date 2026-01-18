@@ -230,7 +230,11 @@ export function ApplicationStatus() {
                   {application.applying_for_financial_aid ? (
                     <p><strong>Processing Your Financial Aid Information</strong></p>
                   ) : (
-                    <p><strong>Payment Required:</strong> Send application fee via Venmo to <strong>@placeholder-ash-venmo</strong></p>
+                    <p>
+                      <b>Payment Required:</b><br />
+                      Send application fee via Zelle to <b>elmseedconsulting@gmail.com</b>.<br />
+                      Please add your name and date of birth to the payment message so we can verify your payment.
+                    </p>
                   )}
                 </div>
               </div>

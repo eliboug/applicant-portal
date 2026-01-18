@@ -51,7 +51,7 @@ CREATE TABLE application_documents (
   file_path TEXT NOT NULL,
   file_name TEXT NOT NULL,
   file_type TEXT NOT NULL CHECK (
-    file_type IN ('application', 'transcript')
+    file_type IN ('application', 'supporting_document')
   ),
   uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

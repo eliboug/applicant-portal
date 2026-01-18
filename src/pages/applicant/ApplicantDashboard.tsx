@@ -150,8 +150,8 @@ export function ApplicantDashboard() {
                 <FileText size={20} />
               </div>
               <div>
-                <strong>Transcript PDF</strong>
-                <p>Official or unofficial transcript</p>
+                <strong>Supporting Document (Optional)</strong>
+                <p>Resume or unofficial transcript</p>
               </div>
             </div>
           </div>
@@ -169,8 +169,8 @@ export function ApplicantDashboard() {
           <div>
             <h3>Payment Information</h3>
             <p>
-              After submitting your application, send the application fee via Venmo to <strong >@INSERT ASH VENMO</strong>.
-              Include your email address in the payment note for verification.
+              After submitting your application, send the application fee via Zelle to <strong>elmseedconsulting@gmail.com</strong>.
+              Please add your name and date of birth to the payment message so we can verify your payment.
             </p>
           </div>
         </div>

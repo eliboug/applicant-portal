@@ -1,10 +1,10 @@
-import type { TextareaHTMLAttributes } from 'react';
+import type { TextareaHTMLAttributes, ReactNode } from 'react';
 import styles from './Textarea.module.css';
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
-  hint?: string;
+  hint?: ReactNode;
 }
 
 export function Textarea({

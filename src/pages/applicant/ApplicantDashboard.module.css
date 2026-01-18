@@ -101,7 +101,7 @@
 
 .requirementItem {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--spacing-md);
   padding: var(--spacing-md);
   background-color: var(--color-off-white);

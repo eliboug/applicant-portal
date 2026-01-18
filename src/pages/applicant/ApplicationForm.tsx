@@ -154,8 +154,7 @@ export function ApplicationForm() {
 
     // Check documents
     const applicationDoc = documents.find(d => d.file_type === 'application');
-    const transcriptDoc = documents.find(d => d.file_type === 'transcript');
-    if (!applicationDoc || !transcriptDoc) {
+    if (!applicationDoc) {
       errors.push('documents');
     }
 
@@ -182,14 +181,14 @@ export function ApplicationForm() {
 
     if (step === 'documents') {
       const applicationDoc = documents.find(d => d.file_type === 'application');
-      const transcriptDoc = documents.find(d => d.file_type === 'transcript');
+      const supportingDoc = documents.find(d => d.file_type === 'supporting_document');
       const hasFinancialAidAnswer = applyingForFinancialAid !== null;
       const hasFinancialAidComplete = applyingForFinancialAid === null ? false :
         applyingForFinancialAid === true ? (financialCircumstances && financialConsent) :
         !!paymentCertification;
 
-      const allComplete = applicationDoc && transcriptDoc && hasFinancialAidAnswer && hasFinancialAidComplete;
-      const someComplete = applicationDoc || transcriptDoc || hasFinancialAidAnswer;
+      const allComplete = applicationDoc && hasFinancialAidAnswer && hasFinancialAidComplete;
+      const someComplete = applicationDoc || supportingDoc || hasFinancialAidAnswer;
 
       if (allComplete) return 'complete';
       if (someComplete) return 'in-progress';
@@ -458,11 +457,11 @@ export function ApplicationForm() {
               </p>
 
               <div className={styles.uploadSection}>
-                {['application', 'transcript'].map((docType) => (
+                {['application', 'supporting_document'].map((docType) => (
                   <div key={docType} className={styles.uploadRow}>
                     <div className={styles.uploadInfo}>
                       <span className={styles.uploadLabel}>
-                        {docType === 'application' ? 'Application PDF *' : 'Unofficial Transcript *'}
+                        {docType === 'application' ? 'Application PDF *' : <><b>OPTIONAL:</b> Supplementary Information (Resume or Unofficial Transcript)</>}
                       </span>
                       {documents.find(d => d.file_type === docType) ? (
                         <span className={styles.uploadedFile}>
@@ -556,7 +555,7 @@ export function ApplicationForm() {
                       onChange={(e) => setPaymentCertification(e.target.value)}
                       rows={3}
                       required
-                      hint="I certify that I have submitted the $20 application fee in connection with my application, with the payment clearly identified by my full name (first and last), email address, and phone number. Please enter your full legal name."
+                      hint={<>I certify that I have submitted the $20 application fee in connection with my application via <b>Zelle</b> to <b>elmseedconsulting@gmail.com</b>, with the payment clearly identified by my full name (first and last), email address, and phone number in the payment note. Please enter your full legal name.</>}
                     />
                   </div>
                 )}
@@ -602,10 +601,10 @@ export function ApplicationForm() {
                     <li className={styles.noDocuments}>No documents uploaded</li>
                   )}
                 </ul>
-                {(!documents.find(d => d.file_type === 'application') || !documents.find(d => d.file_type === 'transcript')) && (
+                {!documents.find(d => d.file_type === 'application') && (
                   <p className={styles.documentWarning}>
                     <AlertCircle size={16} />
-                    Both application and transcript documents are required before submission
+                    Application document is required before submission
                   </p>
                 )}
               </div>
@@ -643,7 +642,6 @@ export function ApplicationForm() {
                   size="lg"
                   disabled={
                     !documents.find(d => d.file_type === 'application') || 
-                    !documents.find(d => d.file_type === 'transcript') || 
                     !firstName || 
                     !lastName || 
                     !dateOfBirth || 

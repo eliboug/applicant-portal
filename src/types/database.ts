@@ -273,7 +273,7 @@ export type ApplicationStatus =
 
 export type Decision = 'accepted' | 'rejected';
 
-export type DocumentType = 'application' | 'transcript';
+export type DocumentType = 'application' | 'supporting_document';
 
 export type ClassYear = 'Freshman' | 'Sophomore' | 'Junior' | 'Senior';
 

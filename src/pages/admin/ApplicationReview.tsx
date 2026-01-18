@@ -488,7 +488,7 @@ export function ApplicationReview() {
                       <DollarSign size={20} />
                       <div>
                         <strong>Verify Payment</strong>
-                        <p>Confirm Venmo payment has been received</p>
+                        <p>Confirm Zelle payment has been received</p>
                       </div>
                     </div>
                     <Button onClick={handleVerifyPayment} loading={saving}>
