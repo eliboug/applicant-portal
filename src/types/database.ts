@@ -113,6 +113,7 @@ export type Database = {
           payment_verified_by: string | null
           personal_info: Json | null
           state: string | null
+          submitted_at: string | null
           updated_at: string
           user_id: string
         }
@@ -139,6 +140,7 @@ export type Database = {
           payment_verified_by?: string | null
           personal_info?: Json | null
           state?: string | null
+          submitted_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -165,6 +167,7 @@ export type Database = {
           payment_verified_by?: string | null
           personal_info?: Json | null
           state?: string | null
+          submitted_at?: string | null
           updated_at?: string
           user_id?: string
         }

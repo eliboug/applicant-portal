@@ -38,6 +38,7 @@ CREATE TABLE applications (
   payment_verified_by UUID REFERENCES profiles(id),
   -- Final decision
   decision TEXT CHECK (decision IN ('accepted', 'rejected')),
+  submitted_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

@@ -359,7 +359,13 @@ export function AdminDashboard() {
                           <span className={styles.paymentPending}>Pending</span>
                         )}
                       </td>
-                      <td>{new Date(app.created_at).toLocaleDateString('en-US', { timeZone: 'UTC' })}</td>
+                      <td>
+                        {app.submitted_at ? (
+                          new Date(app.submitted_at).toLocaleDateString('en-US', { timeZone: 'UTC' })
+                        ) : (
+                          <span style={{ color: '#9ca3af' }}>Not submitted</span>
+                        )}
+                      </td>
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                           <Link to={`/admin/application/${app.id}`}>
