@@ -2,7 +2,12 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@14.10.0?target=deno'
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
+if (!stripeSecretKey) {
+  throw new Error('STRIPE_SECRET_KEY is not configured')
+}
+
+const stripe = new Stripe(stripeSecretKey, {
   apiVersion: '2023-10-16',
   httpClient: Stripe.createFetchHttpClient(),
 })
@@ -58,10 +63,10 @@ serve(async (req) => {
       )
     }
 
-    // Verify application belongs to user
+    // Verify application belongs to user and is eligible for payment
     const { data: application, error: appError } = await supabase
       .from('applications')
-      .select('id, user_id, first_name, last_name')
+      .select('id, user_id, first_name, last_name, current_status, payment_verified, stripe_payment_intent_id, stripe_payment_status')
       .eq('id', applicationId)
       .eq('user_id', user.id)
       .single()
@@ -71,6 +76,43 @@ serve(async (req) => {
         JSON.stringify({ error: 'Application not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    }
+
+    // Security: Only allow payment intent creation for submitted, unpaid applications
+    if (application.current_status !== 'submitted') {
+      return new Response(
+        JSON.stringify({ error: 'Application must be submitted before creating payment intent' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (application.payment_verified) {
+      return new Response(
+        JSON.stringify({ error: 'Payment has already been verified for this application' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Check for existing payment intent to prevent duplicates (rate limiting)
+    if (application.stripe_payment_intent_id && application.stripe_payment_status === 'pending') {
+      // Retrieve existing payment intent to check if it's still valid
+      try {
+        const existingIntent = await stripe.paymentIntents.retrieve(application.stripe_payment_intent_id)
+
+        // If there's a pending/processing payment intent, return it instead of creating new one
+        if (existingIntent.status === 'requires_payment_method' ||
+            existingIntent.status === 'requires_confirmation' ||
+            existingIntent.status === 'requires_action' ||
+            existingIntent.status === 'processing') {
+          return new Response(
+            JSON.stringify({ clientSecret: existingIntent.client_secret }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      } catch (err) {
+        // If payment intent not found or error, continue to create new one
+        console.log('Existing payment intent not found or invalid, creating new one')
+      }
     }
 
     // Create Stripe Payment Intent for embedded payment form
@@ -87,6 +129,15 @@ serve(async (req) => {
       },
       receipt_email: user.email,
     })
+
+    // Store payment intent ID and status in database for tracking and rate limiting
+    await supabase
+      .from('applications')
+      .update({
+        stripe_payment_intent_id: paymentIntent.id,
+        stripe_payment_status: 'pending',
+      })
+      .eq('id', applicationId)
 
     // Return client secret for Payment Element
     return new Response(

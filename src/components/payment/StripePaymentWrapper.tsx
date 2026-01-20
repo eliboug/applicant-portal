@@ -20,6 +20,60 @@ function PaymentForm({ applicationId, onSuccess, onCancel }: StripePaymentWrappe
   const [error, setError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
+  // Poll application status to check if webhook has processed payment
+  const pollPaymentVerification = async () => {
+    const maxAttempts = 20; // Poll for up to 20 seconds (20 attempts * 1 second)
+    let attempts = 0;
+
+    const checkStatus = async (): Promise<boolean> => {
+      try {
+        const { data: application, error } = await supabase
+          .from('applications')
+          .select('payment_verified, stripe_payment_status')
+          .eq('id', applicationId)
+          .single();
+
+        if (error) {
+          console.error('Error checking payment status:', error);
+          return false;
+        }
+
+        // Check if payment has been verified by webhook
+        if (application?.payment_verified) {
+          return true;
+        }
+
+        // Check if payment failed
+        if (application?.stripe_payment_status === 'failed') {
+          setError('Payment verification failed. Please try again.');
+          return false;
+        }
+
+        // Continue polling if not yet verified
+        attempts++;
+        if (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return checkStatus();
+        } else {
+          // Timeout: payment might still process, but stop polling
+          console.warn('Payment verification polling timed out');
+          return true; // Still call onSuccess as payment was submitted successfully
+        }
+      } catch (err) {
+        console.error('Error polling payment status:', err);
+        return false;
+      }
+    };
+
+    const verified = await checkStatus();
+    if (verified) {
+      onSuccess();
+    } else {
+      setPaymentSuccess(false);
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -42,14 +96,12 @@ function PaymentForm({ applicationId, onSuccess, onCancel }: StripePaymentWrappe
       setError(submitError.message || 'Payment failed');
       setLoading(false);
     } else {
-      // Payment succeeded - show success message
+      // Payment succeeded - show success message and poll for verification
       setLoading(false);
       setPaymentSuccess(true);
-      
-      // Wait for webhook to process (give it a moment)
-      setTimeout(() => {
-        onSuccess();
-      }, 2000);
+
+      // Poll application status to wait for webhook processing
+      pollPaymentVerification();
     }
   };
 
