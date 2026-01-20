@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { StripePaymentWrapper } from './StripePaymentWrapper'
 import { supabase } from '../../lib/supabase'
 
@@ -34,7 +34,7 @@ vi.mock('../../lib/supabase', () => ({
 }))
 
 // Mock fetch
-global.fetch = vi.fn()
+globalThis.fetch = vi.fn() as any
 
 describe('StripePaymentWrapper', () => {
   const mockApplicationId = 'test-app-123'
@@ -61,7 +61,7 @@ describe('StripePaymentWrapper', () => {
   })
 
   it('should show loading state initially', () => {
-    vi.mocked(global.fetch).mockImplementation(() => new Promise(() => {})) // Never resolves
+    vi.mocked(globalThis.fetch).mockImplementation(() => new Promise(() => {})) // Never resolves
 
     render(
       <StripePaymentWrapper
@@ -75,7 +75,7 @@ describe('StripePaymentWrapper', () => {
   })
 
   it('should create payment intent on mount', async () => {
-    vi.mocked(global.fetch).mockResolvedValueOnce({
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ clientSecret: 'test-secret-123' }),
     } as Response)
@@ -88,7 +88,7 @@ describe('StripePaymentWrapper', () => {
     )
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/functions/v1/create-payment-intent'),
         expect.objectContaining({
           method: 'POST',
@@ -121,7 +121,7 @@ describe('StripePaymentWrapper', () => {
   })
 
   it('should show error if payment intent creation fails', async () => {
-    vi.mocked(global.fetch).mockResolvedValueOnce({
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: false,
       json: async () => ({ error: 'Application must be submitted before creating payment intent' }),
     } as Response)
@@ -141,7 +141,7 @@ describe('StripePaymentWrapper', () => {
   })
 
   it('should show error if payment already verified', async () => {
-    vi.mocked(global.fetch).mockResolvedValueOnce({
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: false,
       json: async () => ({ error: 'Payment has already been verified for this application' }),
     } as Response)
@@ -161,7 +161,7 @@ describe('StripePaymentWrapper', () => {
   })
 
   it('should render payment form when client secret is available', async () => {
-    vi.mocked(global.fetch).mockResolvedValueOnce({
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ clientSecret: 'test-secret-123' }),
     } as Response)
