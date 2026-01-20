@@ -1,26 +1,35 @@
 /* Elmseed Applicant Portal - Global Styles */
 
-/* Import Halant font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Halant:wght@300;400;500;600;700&display=swap');
+/* Import distinctive fonts */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 /* CSS Custom Properties (Design Tokens) */
 :root {
-  /* Primary Colors */
-  --color-elm-green-dark: #0F2D1C;
-  --color-elm-green: #1F6B3F;
-  --color-elm-green-light: #9AD18B;
-  
+  /* Primary Colors - Enriched Botanical Palette */
+  --color-elm-green-dark: #1A3D2E;
+  --color-elm-green: #2F7855;
+  --color-elm-green-light: #7FB899;
+  --color-sage: #A8B9A5;
+  --color-forest: #234D3A;
+
+  /* Earth Tones */
+  --color-cream: #FAF7F2;
+  --color-sand: #E8E3D8;
+  --color-terracotta: #C77353;
+  --color-brass: #B8935F;
+
   /* Neutrals */
   --color-off-white: #F7F8F6;
   --color-white: #FFFFFF;
   --color-gray-light: #E8EBE7;
   --color-gray-mid: #B8C4BC;
-  
+  --color-charcoal: #2C3531;
+
   /* Text */
-  --color-text-primary: #0A0A0A;
+  --color-text-primary: #1A1F1D;
   --color-text-secondary: #5F6F66;
   --color-text-muted: #8A9A90;
-  
+
   /* Status Colors */
   --color-status-draft: #6B7280;
   --color-status-submitted: #2563EB;
@@ -28,12 +37,15 @@
   --color-status-interview: #7C3AED;
   --color-status-accepted: #059669;
   --color-status-rejected: #DC2626;
-  
+
   /* Typography */
-  --font-family: 'Halant', Georgia, serif;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
   --font-weight-light: 300;
   --font-weight-regular: 400;
+  --font-weight-medium: 500;
   --font-weight-semibold: 600;
+  --font-weight-bold: 700;
   
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -74,11 +86,11 @@ html {
 }
 
 body {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);
-  background-color: var(--color-off-white);
-  line-height: 1.5;
+  background-color: var(--color-cream);
+  line-height: 1.6;
   min-height: 100vh;
 }
 

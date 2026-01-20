@@ -1,10 +1,13 @@
 .header {
-  background-color: var(--color-elm-green-dark);
+  background: linear-gradient(135deg, var(--color-elm-green-dark) 0%, var(--color-forest) 100%);
   color: var(--color-white);
-  padding: var(--spacing-md) 0;
+  padding: var(--spacing-lg) 0;
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 16px rgba(26, 61, 46, 0.1);
+  border-bottom: 1px solid rgba(127, 184, 153, 0.15);
 }
 
 .container {
@@ -36,16 +39,20 @@
 }
 
 .logoText {
-  font-size: 1.5rem;
-  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-weight: var(--font-weight-bold);
   line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .logoSubtext {
-  font-size: 0.75rem;
-  font-weight: var(--font-weight-light);
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-medium);
   color: var(--color-elm-green-light);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .nav {

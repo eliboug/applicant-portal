@@ -470,7 +470,7 @@ export function ApplicationForm() {
               </p>
 
               <div className={styles.uploadSection}>
-                {['application', 'supporting_document'].map((docType) => (
+                {['application', 'transcript'].map((docType) => (
                   <div key={docType} className={styles.uploadRow}>
                     <div className={styles.uploadInfo}>
                       <span className={styles.uploadLabel}>
