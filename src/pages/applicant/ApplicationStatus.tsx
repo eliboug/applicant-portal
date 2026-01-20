@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FileText, Clock, CheckCircle, AlertCircle, DollarSign, Search, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAuth } from '../../contexts/AuthContext';
@@ -23,11 +23,13 @@ const statusOrder: Status[] = ['draft', 'submitted', 'payment_received', 'in_rev
 export function ApplicationStatus() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [application, setApplication] = useState<Application | null>(null);
   const [document, setDocument] = useState<ApplicationDocument | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [decisionRevealed, setDecisionRevealed] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   // Redirect to dashboard if application is in draft status
   useEffect(() => {
@@ -77,6 +79,18 @@ export function ApplicationStatus() {
   useEffect(() => {
     if (user) {
       fetchApplication();
+      
+      // Check if returning from Stripe Checkout
+      const sessionId = searchParams.get('session_id');
+      if (sessionId) {
+        setPaymentSuccess(true);
+        // Remove session_id from URL
+        searchParams.delete('session_id');
+        setSearchParams(searchParams);
+        
+        // Show success message for 5 seconds
+        setTimeout(() => setPaymentSuccess(false), 5000);
+      }
     }
   }, [user]);
 
@@ -201,6 +215,13 @@ export function ApplicationStatus() {
         <div className={styles.error} role="alert">
           <AlertCircle size={18} />
           {error}
+        </div>
+      )}
+
+      {paymentSuccess && (
+        <div className={styles.successBanner} role="alert">
+          <CheckCircle size={18} />
+          <span>Payment successful! Your application fee has been processed and verified.</span>
         </div>
       )}
 

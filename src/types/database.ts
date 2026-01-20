@@ -108,11 +108,15 @@ export type Database = {
           id: string
           last_name: string | null
           payment_certification: string | null
+          payment_method: string | null
           payment_verified: boolean
           payment_verified_at: string | null
           payment_verified_by: string | null
           personal_info: Json | null
           state: string | null
+          stripe_payment_intent_id: string | null
+          stripe_payment_status: string | null
+          stripe_session_id: string | null
           submitted_at: string | null
           updated_at: string
           user_id: string
@@ -135,11 +139,15 @@ export type Database = {
           id?: string
           last_name?: string | null
           payment_certification?: string | null
+          payment_method?: string | null
           payment_verified?: boolean
           payment_verified_at?: string | null
           payment_verified_by?: string | null
           personal_info?: Json | null
           state?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_payment_status?: string | null
+          stripe_session_id?: string | null
           submitted_at?: string | null
           updated_at?: string
           user_id: string
@@ -162,11 +170,15 @@ export type Database = {
           id?: string
           last_name?: string | null
           payment_certification?: string | null
+          payment_method?: string | null
           payment_verified?: boolean
           payment_verified_at?: string | null
           payment_verified_by?: string | null
           personal_info?: Json | null
           state?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_payment_status?: string | null
+          stripe_session_id?: string | null
           submitted_at?: string | null
           updated_at?: string
           user_id?: string

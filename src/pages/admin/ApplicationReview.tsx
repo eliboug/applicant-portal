@@ -341,7 +341,14 @@ export function ApplicationReview() {
                 
                 <dt>Submitted</dt>
                 <dd>{new Date(application.created_at).toLocaleDateString('en-US', { timeZone: 'UTC' })}</dd>
-                
+
+                <dt>Payment Method</dt>
+                <dd>
+                  {application.payment_method === 'stripe' ? 'Credit/Debit Card (Stripe)' :
+                   application.payment_method === 'zelle' ? 'Zelle' :
+                   application.applying_for_financial_aid ? 'N/A (Financial Aid)' : '—'}
+                </dd>
+
                 <dt>Payment Status</dt>
                 <dd>
                   {application.payment_verified ? (
@@ -353,6 +360,33 @@ export function ApplicationReview() {
                     <span className={styles.paymentPending}>Awaiting verification</span>
                   )}
                 </dd>
+
+                {application.payment_method === 'stripe' && application.stripe_payment_intent_id && (
+                  <>
+                    <dt>Stripe Payment ID</dt>
+                    <dd style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                      {application.stripe_payment_intent_id}
+                    </dd>
+                    <dt>Stripe Payment Status</dt>
+                    <dd>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        backgroundColor: application.stripe_payment_status === 'succeeded' ? 'rgba(5, 150, 105, 0.1)' :
+                                       application.stripe_payment_status === 'pending' ? 'rgba(245, 158, 11, 0.1)' :
+                                       'rgba(220, 38, 38, 0.1)',
+                        color: application.stripe_payment_status === 'succeeded' ? '#059669' :
+                               application.stripe_payment_status === 'pending' ? '#d97706' :
+                               '#DC2626'
+                      }}>
+                        {application.stripe_payment_status || 'pending'}
+                      </span>
+                    </dd>
+                  </>
+                )}
                 {application.decision && (
                   <>
                     <dt>Decision</dt>
@@ -481,13 +515,13 @@ export function ApplicationReview() {
               </div>
 
               <div className={styles.actionsList}>
-                {/* Payment Verification */}
-                {application.current_status === 'received' && !application.payment_verified && (
+                {/* Payment Verification - Only for Zelle payments */}
+                {application.current_status === 'submitted' && !application.payment_verified && application.payment_method === 'zelle' && (
                   <div className={styles.actionItem}>
                     <div className={styles.actionInfo}>
                       <DollarSign size={20} />
                       <div>
-                        <strong>Verify Payment</strong>
+                        <strong>Verify Zelle Payment</strong>
                         <p>Confirm Zelle payment has been received</p>
                       </div>
                     </div>
@@ -495,6 +529,19 @@ export function ApplicationReview() {
                       <CheckCircle size={16} />
                       Verify Payment
                     </Button>
+                  </div>
+                )}
+
+                {/* Note for Stripe payments - automatic verification */}
+                {application.current_status === 'submitted' && application.payment_method === 'stripe' && !application.payment_verified && (
+                  <div className={styles.actionItem} style={{ borderLeft: '3px solid #2563EB' }}>
+                    <div className={styles.actionInfo}>
+                      <DollarSign size={20} />
+                      <div>
+                        <strong>Stripe Payment</strong>
+                        <p>Payment will be automatically verified when completed. Current status: {application.stripe_payment_status || 'pending'}</p>
+                      </div>
+                    </div>
                   </div>
                 )}
 

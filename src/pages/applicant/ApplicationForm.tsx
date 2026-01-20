@@ -9,6 +9,7 @@ import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { Textarea } from '../../components/ui/Textarea';
 import { Card, CardContent } from '../../components/ui/Card';
+import { StripePaymentWrapper } from '../../components/payment/StripePaymentWrapper';
 import styles from './ApplicationForm.module.css';
 
 type FormStep = 'info' | 'documents' | 'review';
@@ -45,6 +46,8 @@ export function ApplicationForm() {
   const [financialCircumstances, setFinancialCircumstances] = useState('');
   const [financialConsent, setFinancialConsent] = useState('');
   const [paymentCertification, setPaymentCertification] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'zelle' | null>(null);
+  const [showStripePayment, setShowStripePayment] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -90,6 +93,7 @@ export function ApplicationForm() {
       setFinancialCircumstances(app.financial_circumstances_overview || '');
       setFinancialConsent(app.financial_documentation_consent || '');
       setPaymentCertification(app.payment_certification || '');
+      setPaymentMethod((app.payment_method as 'stripe' | 'zelle') || null);
       const { data: docs } = await supabase
         .from('application_documents')
         .select('*')
@@ -125,6 +129,7 @@ export function ApplicationForm() {
           financial_circumstances_overview: financialCircumstances || null,
           financial_documentation_consent: financialConsent || null,
           payment_certification: paymentCertification || null,
+          payment_method: paymentMethod,
         })
         .eq('id', id);
 
@@ -163,8 +168,14 @@ export function ApplicationForm() {
       errors.push('documents');
     } else if (applyingForFinancialAid === true && (!financialCircumstances || !financialConsent)) {
       errors.push('documents');
-    } else if (applyingForFinancialAid === false && !paymentCertification) {
-      errors.push('documents');
+    } else if (applyingForFinancialAid === false) {
+      // Check payment method selection and completion
+      if (!paymentMethod) {
+        errors.push('documents');
+      } else if (paymentMethod === 'zelle' && !paymentCertification) {
+        errors.push('documents');
+      }
+      // Note: Stripe payment is verified automatically via webhook
     }
 
     return errors;
@@ -185,7 +196,8 @@ export function ApplicationForm() {
       const hasFinancialAidAnswer = applyingForFinancialAid !== null;
       const hasFinancialAidComplete = applyingForFinancialAid === null ? false :
         applyingForFinancialAid === true ? (financialCircumstances && financialConsent) :
-        !!paymentCertification;
+        // For payment: need method selected and either Stripe payment verified or Zelle certification
+        (paymentMethod && (paymentMethod === 'zelle' ? !!paymentCertification : true));
 
       const allComplete = applicationDoc && hasFinancialAidAnswer && hasFinancialAidComplete;
       const someComplete = applicationDoc || supportingDoc || hasFinancialAidAnswer;
@@ -236,6 +248,7 @@ export function ApplicationForm() {
           financial_circumstances_overview: financialCircumstances,
           financial_documentation_consent: financialConsent,
           payment_certification: paymentCertification,
+          payment_method: paymentMethod,
           current_status: 'submitted',
         })
         .eq('id', id);
@@ -549,14 +562,51 @@ export function ApplicationForm() {
 
                 {applyingForFinancialAid === false && (
                   <div className={styles.conditionalFields}>
-                    <Textarea
-                      label="Payment Certification"
-                      value={paymentCertification}
-                      onChange={(e) => setPaymentCertification(e.target.value)}
-                      rows={3}
-                      required
-                      hint={<>I certify that I have submitted the $20 application fee in connection with my application via <b>Zelle</b> to <b>elmseedconsulting@gmail.com</b>, with the payment clearly identified by my full name (first and last), email address, and phone number in the payment note. Please enter your full legal name.</>}
-                    />
+                    <div className={styles.radioGroup}>
+                      <label className={styles.radioLabel}>
+                        Select Payment Method
+                      </label>
+                      <div className={styles.radioOptions}>
+                        <label className={styles.radioOption}>
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            checked={paymentMethod === 'stripe'}
+                            onChange={() => setPaymentMethod('stripe')}
+                          />
+                          <span>Pay with Card (Stripe)</span>
+                        </label>
+                        <label className={styles.radioOption}>
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            checked={paymentMethod === 'zelle'}
+                            onChange={() => setPaymentMethod('zelle')}
+                          />
+                          <span>Pay with Zelle</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {paymentMethod === 'stripe' && (
+                      <div className={styles.stripeInfo}>
+                        <p className={styles.paymentAmount}>Application Fee: <strong>$20.00</strong></p>
+                        <p className={styles.paymentDescription}>
+                          You will complete your payment on the review page before submitting your application.
+                        </p>
+                      </div>
+                    )}
+
+                    {paymentMethod === 'zelle' && (
+                      <Textarea
+                        label="Payment Certification"
+                        value={paymentCertification}
+                        onChange={(e) => setPaymentCertification(e.target.value)}
+                        rows={3}
+                        required
+                        hint={<>I certify that I have submitted the $20 application fee in connection with my application via <b>Zelle</b> to <b>elmseedconsulting@gmail.com</b>, with the payment clearly identified by my full name (first and last), email address, and phone number in the payment note. Please enter your full legal name.</>}
+                      />
+                    )}
                   </div>
                 )}
               </div>
@@ -624,40 +674,111 @@ export function ApplicationForm() {
                   )}
                   {applyingForFinancialAid === false && (
                     <>
-                      <dt>Payment Certification</dt>
-                      <dd className={styles.longText}>{paymentCertification || 'Not provided'}</dd>
+                      <dt>Payment Method</dt>
+                      <dd>{paymentMethod === 'stripe' ? 'Credit/Debit Card (Stripe)' : paymentMethod === 'zelle' ? 'Zelle' : 'Not selected'}</dd>
+                      {paymentMethod === 'zelle' && (
+                        <>
+                          <dt>Payment Certification</dt>
+                          <dd className={styles.longText}>{paymentCertification || 'Not provided'}</dd>
+                        </>
+                      )}
+                      {paymentMethod === 'stripe' && (
+                        <>
+                          <dt>Payment Status</dt>
+                          <dd>{application?.payment_verified ? '✓ Verified' : 'Pending verification'}</dd>
+                        </>
+                      )}
                     </>
                   )}
                 </dl>
               </div>
 
-              <div className={styles.submitSection}>
-                <p className={styles.submitWarning}>
-                  By submitting, you confirm that all information is accurate.
-                  You will not be able to edit your application after submission.
-                </p>
-                <Button 
-                  onClick={handleSubmit} 
-                  loading={saving} 
-                  size="lg"
-                  disabled={
-                    !documents.find(d => d.file_type === 'application') || 
-                    !firstName || 
-                    !lastName || 
-                    !dateOfBirth || 
-                    !highSchool || 
-                    !gpa || 
-                    !country || 
-                    !classYear ||
-                    applyingForFinancialAid === null ||
-                    (applyingForFinancialAid === true && (!financialCircumstances || !financialConsent)) ||
-                    (applyingForFinancialAid === false && !paymentCertification)
-                  }
-                >
-                  <Send size={18} />
-                  Submit Application
-                </Button>
-              </div>
+              {/* Stripe Payment Section - Only show if Stripe selected and not yet paid */}
+              {applyingForFinancialAid === false && paymentMethod === 'stripe' && !application?.payment_verified && (
+                <div className={styles.stripePaymentSection}>
+                  <h3>Complete Payment</h3>
+                  <p className={styles.sectionDescription}>
+                    Please complete your $20 application fee payment before submitting.
+                  </p>
+                  {!showStripePayment ? (
+                    <div className={styles.stripeInfo}>
+                      <p className={styles.paymentAmount}>Application Fee: <strong>$20.00</strong></p>
+                      {(!documents.find(d => d.file_type === 'application') ||
+                        !firstName ||
+                        !lastName ||
+                        !dateOfBirth ||
+                        !highSchool ||
+                        !gpa ||
+                        !country ||
+                        !classYear) ? (
+                        <p style={{ color: 'var(--color-status-rejected)', fontSize: '0.875rem', margin: '0.5rem 0' }}>
+                          Please complete all required application fields before proceeding to payment.
+                        </p>
+                      ) : null}
+                      <Button
+                        variant="primary"
+                        onClick={() => setShowStripePayment(true)}
+                        disabled={
+                          !documents.find(d => d.file_type === 'application') ||
+                          !firstName ||
+                          !lastName ||
+                          !dateOfBirth ||
+                          !highSchool ||
+                          !gpa ||
+                          !country ||
+                          !classYear
+                        }
+                        size="lg"
+                      >
+                        <Send size={18} />
+                        Submit Application
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className={styles.stripeFormContainer}>
+                      <StripePaymentWrapper
+                        applicationId={id!}
+                        onSuccess={() => {
+                          // Navigate to status page after successful payment
+                          navigate('/status');
+                        }}
+                        onCancel={() => setShowStripePayment(false)}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Only show submit button if NOT using Stripe or if Stripe payment is already verified */}
+              {!(applyingForFinancialAid === false && paymentMethod === 'stripe' && !application?.payment_verified) && (
+                <div className={styles.submitSection}>
+                  <p className={styles.submitWarning}>
+                    By submitting, you confirm that all information is accurate.
+                    You will not be able to edit your application after submission.
+                  </p>
+                  <Button 
+                    onClick={handleSubmit} 
+                    loading={saving} 
+                    size="lg"
+                    disabled={
+                      !documents.find(d => d.file_type === 'application') ||
+                      !firstName ||
+                      !lastName ||
+                      !dateOfBirth ||
+                      !highSchool ||
+                      !gpa ||
+                      !country ||
+                      !classYear ||
+                      applyingForFinancialAid === null ||
+                      (applyingForFinancialAid === true && (!financialCircumstances || !financialConsent)) ||
+                      (applyingForFinancialAid === false && (!paymentMethod || (paymentMethod === 'zelle' && !paymentCertification) || (paymentMethod === 'stripe' && !application?.payment_verified)))
+                    }
+                  >
+                    <Send size={18} />
+                    Submit Application
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
