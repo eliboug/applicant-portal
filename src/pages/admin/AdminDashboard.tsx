@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, FileText, DollarSign, Search, Eye, AlertCircle, Send, CheckCircle, XCircle } from 'lucide-react';
+import { Users, FileText, DollarSign, Search, Eye, AlertCircle, Send, CheckCircle, XCircle, Copy } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Application, ApplicationStatus } from '../../types/database.ts';
@@ -46,6 +46,7 @@ export function AdminDashboard() {
   const [releasingDecision, setReleasingDecision] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [releasingAll, setReleasingAll] = useState(false);
+  const [copyingEmails, setCopyingEmails] = useState(false);
 
   useEffect(() => {
     fetchApplications();
@@ -197,6 +198,31 @@ export function AdminDashboard() {
     }
   }
 
+  async function copyAllEmails() {
+    setCopyingEmails(true);
+    
+    try {
+      const emails = filteredApplications
+        .map(app => app.profiles?.email)
+        .filter(email => email && email !== '—');
+      
+      if (emails.length === 0) {
+        alert('No emails to copy in the current view.');
+        return;
+      }
+      
+      const emailText = emails.join('\n');
+      await navigator.clipboard.writeText(emailText);
+      
+      alert(`Copied ${emails.length} email(s) to clipboard.`);
+    } catch (err) {
+      console.error('Failed to copy emails:', err);
+      alert('Failed to copy emails. Please try again.');
+    } finally {
+      setCopyingEmails(false);
+    }
+  }
+
   const filteredApplications = statusFilter === 'all'
     ? applications
     : statusFilter === 'pending_payment'
@@ -223,16 +249,26 @@ export function AdminDashboard() {
           <h1>Admin Dashboard</h1>
           <p className={styles.subtitle}>Application Management</p>
         </div>
-        {decisionsReadyToRelease > 0 && (
+        <div style={{ display: 'flex', gap: '1rem' }}>
           <Button
-            variant="primary"
-            onClick={releaseAllDecisions}
-            loading={releasingAll}
+            variant="outline"
+            onClick={copyAllEmails}
+            loading={copyingEmails}
           >
-            <Send size={18} />
-            Release All Decisions ({decisionsReadyToRelease})
+            <Copy size={18} />
+            Copy Emails ({filteredApplications.length})
           </Button>
-        )}
+          {decisionsReadyToRelease > 0 && (
+            <Button
+              variant="primary"
+              onClick={releaseAllDecisions}
+              loading={releasingAll}
+            >
+              <Send size={18} />
+              Release All Decisions ({decisionsReadyToRelease})
+            </Button>
+          )}
+        </div>
       </header>
 
       <div className={styles.metrics}>
@@ -287,7 +323,8 @@ export function AdminDashboard() {
               >
                 <option value="all">All Statuses</option>
                 <option value="pending_payment">⚠️ Awaiting Payment</option>
-                <option value="received">Received</option>
+                <option value="draft">Draft</option>
+                <option value="submitted">Submitted</option>
                 <option value="payment_received">Payment Received</option>
                 <option value="in_review">In Review</option>
                 <option value="decision_released">Decision Released</option>
