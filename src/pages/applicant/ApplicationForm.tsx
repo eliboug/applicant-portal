@@ -9,8 +9,7 @@ import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { Textarea } from '../../components/ui/Textarea';
 import { Card, CardContent } from '../../components/ui/Card';
-// TEMPORARILY HIDDEN: Stripe payment - only Zelle is active
-// import { StripePaymentWrapper } from '../../components/payment/StripePaymentWrapper';
+import { StripePaymentWrapper } from '../../components/payment/StripePaymentWrapper';
 import styles from './ApplicationForm.module.css';
 
 type FormStep = 'info' | 'documents' | 'review';
@@ -48,21 +47,13 @@ export function ApplicationForm() {
   const [financialConsent, setFinancialConsent] = useState('');
   const [paymentCertification, setPaymentCertification] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'zelle' | null>(null);
-  // TEMPORARILY HIDDEN: Stripe payment state - only Zelle is active
-  // const [showStripePayment, setShowStripePayment] = useState(false);
+  const [showStripePayment, setShowStripePayment] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchApplication();
     }
   }, [id]);
-
-  // Auto-select Zelle as payment method when user selects "No" for financial aid
-  useEffect(() => {
-    if (applyingForFinancialAid === false && paymentMethod !== 'zelle') {
-      setPaymentMethod('zelle');
-    }
-  }, [applyingForFinancialAid, paymentMethod]);
 
   async function fetchApplication() {
     if (!id) {
@@ -571,7 +562,6 @@ export function ApplicationForm() {
 
                 {applyingForFinancialAid === false && (
                   <div className={styles.conditionalFields}>
-                    {/* TEMPORARILY HIDDEN: Payment method selection - only Zelle is active
                     <div className={styles.radioGroup}>
                       <label className={styles.radioLabel}>
                         Select Payment Method
@@ -606,16 +596,17 @@ export function ApplicationForm() {
                         </p>
                       </div>
                     )}
-                    */}
 
-                    <Textarea
-                      label="Payment Certification"
-                      value={paymentCertification}
-                      onChange={(e) => setPaymentCertification(e.target.value)}
-                      rows={3}
-                      required
-                      hint={<>I certify that I have submitted the $20 application fee in connection with my application via <b>Zelle</b> to <b>elmseedconsulting@gmail.com</b>, with the payment clearly identified by my full name (first and last), email address, and phone number in the payment note. Please enter your full legal name.</>}
-                    />
+                    {paymentMethod === 'zelle' && (
+                      <Textarea
+                        label="Payment Certification"
+                        value={paymentCertification}
+                        onChange={(e) => setPaymentCertification(e.target.value)}
+                        rows={3}
+                        required
+                        hint={<>I certify that I have submitted the $20 application fee in connection with my application via <b>Zelle</b> to <b>elmseedconsulting@gmail.com</b>, with the payment clearly identified by my full name (first and last), email address, and phone number in the payment note. Please enter your full legal name.</>}
+                      />
+                    )}
                   </div>
                 )}
               </div>
@@ -702,7 +693,6 @@ export function ApplicationForm() {
                 </dl>
               </div>
 
-              {/* TEMPORARILY HIDDEN: Stripe Payment Section - Only Zelle payment is active
               {applyingForFinancialAid === false && paymentMethod === 'stripe' && !application?.payment_verified && (
                 <div className={styles.stripePaymentSection}>
                   <h3>Complete Payment</h3>
@@ -757,9 +747,8 @@ export function ApplicationForm() {
                   )}
                 </div>
               )}
-              */}
 
-              {/* Submit button - always show since only Zelle is active */}
+              {/* Submit button - show for non-Stripe payments or when Stripe payment is verified */}
               <div className={styles.submitSection}>
                 <p className={styles.submitWarning}>
                   By submitting, you confirm that all information is accurate.
